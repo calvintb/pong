@@ -31,8 +31,8 @@ class Paddle{
         if (Math.abs(difference)>this.speed){
             this.y += -1*this.speed * Math.sign(difference);
         }
-        else if (Math.abs(difference) > 1){
-            this.y -= difference
+        else if (Math.abs(difference) > 20){
+            this.y -= Math.sign(difference)*20
         }
     }
 }
@@ -53,6 +53,7 @@ var canvasContext = canvas.getContext('2d');
 var pong = new Pong();
 var plyr = new Paddle(20,180);
 var cpu = new Paddle(380,180);
+cpu.speed = 200/fps
 
 
 
@@ -86,17 +87,18 @@ function update(){
 function checkHitGoal(){
     if (pong.x + pong.size + 10 < 0){
         cpu.score +=1
-        pong.x=200
-        pong.y=0
-        pong.heading=-30
-        pong.speed = 200/fps
+        reset();2
+
     }else if (pong.x > 410){
-        plyr.score += 1
-        pong.x = 200
-        pong.y = 0
-        pong.heading = 210
-        pong.speed = 200/fps
+        plyr.score +=1
+        reset()
     }
+}
+function reset(){
+    pong.x = 200
+    pong.y = 10
+    pong.heading = Math.random() * 100 - 50
+    pong.speed = 200/fps
 }
 
 function checkHitPong(){
@@ -105,11 +107,11 @@ function checkHitPong(){
     }
     if (pong.x + pong.size > plyr.x + plyr.sizeX && pong.x < plyr.x && pong.y+pong.size>plyr.y && pong.y < plyr.y + plyr.sizeY){
         var difference = (pong.y + pong.size/2) - (plyr.y + plyr.sizeY/2)
-        pong.heading = difference * - 3
+        pong.heading = difference * - 2
         pong.speed += 5/fps
         pong.color = getRandomColor();
     } else if (pong.x + pong.size > cpu.x && pong.x < cpu.x && pong.y>cpu.y && pong.y < cpu.y + cpu.sizeY){
-        pong.heading = (pong.y + pong.size/2 - cpu.y + cpu.sizeY/2) * 4
+        pong.heading = (pong.y + pong.size/2 - (cpu.y + cpu.sizeY/2)) * -2 + 180
         pong.speed += 5/fps
         pong.color = getRandomColor();
     }
@@ -119,34 +121,42 @@ function checkHitWall(){
     if (pong.heading < 0){
         pong.heading = 360+pong.heading;
     }
-    if (pong.y + pong.size >= 400){
+    if (pong.y + pong.size >= 400-10){
         pong.heading = pong.heading * -1
-    } else if (pong.y <=0){
+        pong.y = 390-pong.size;
+    } else if (pong.y <=10){
         pong.heading =   - pong.heading
+        pong.y = 10.001;
     }
-    if (plyr.y + plyr.sizeY>= 400){
-        plyr.y = 400- plyr.sizeY;
+    if (plyr.y + plyr.sizeY>= 400-10){
+        plyr.y = 390- plyr.sizeY;
     }
-    else if(plyr.y <=0){
-        plyr.y = 0;
+    else if(plyr.y <=10){
+        plyr.y = 10.0001;
     }
-    if (cpu.y + cpu.sizeY>= 400){
-        cpu.y = 400- cpu.sizeY;
+    if (cpu.y + cpu.sizeY>= 400-10){
+        cpu.y = 390- cpu.sizeY;
     }
-    else if(cpu.y <=0){
-        cpu.y = 0;
+    else if(cpu.y <=10){
+        cpu.y = 10.0001;
     }
 }
 
 function draw(){
-    createRect(0,0,canvas.width, canvas.height, "black");
+    createRect(0,0,canvas.width, canvas.height, "#303030");
+    createRect(0,0, 10, canvas.height, "blue");
+    createRect(canvas.width-10,0, 10, canvas.height, "red");
+    createRect(0, canvas.height-10, canvas.width, 10, "purple");
+    createRect(0, 0, canvas.width, 10, "purple");
+
     createRect(pong.x, pong.y, pong.size, pong.size, pong.color);
     createRect(plyr.x, plyr.y, plyr.sizeX, plyr.sizeY, plyr.color);
-    createRect(cpu.x, cpu.y, cpu.sizeX, cpu.sizeY, cpu.color);
+    createRect(cpu.x-cpu.sizeX, cpu.y, cpu.sizeX, cpu.sizeY, cpu.color);
+
     canvasContext.font = "20px Arial"
     canvasContext.fillStyle = "#00FF42"
-    canvasContext.fillText("Player: "+ plyr.score, canvas.width -320, 18);
-    canvasContext.fillText("CPU: "+ cpu.score, canvas.width -120, 18);
+    canvasContext.fillText("Player: "+ plyr.score, canvas.width -340, 30);
+    canvasContext.fillText("CPU: "+ cpu.score, canvas.width -120, 30);
 }
 function createRect(x, y, width, height, color){
     canvasContext.fillStyle = color
@@ -167,10 +177,10 @@ window.addEventListener("keyup", ()=>{
 })
 
 function getRandomColor() {
-    var letters = '0123456789ABCDEF';
+    var letters = '789ABCDEF';
     var color = '#';
     for (var i = 0; i < 6; i++) {
-        color += letters[Math.floor(Math.random() * 16)];
+        color += letters[Math.floor(Math.random() * 9)];
     }
     return color;
 }
